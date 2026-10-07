@@ -15,6 +15,74 @@ from backend.services.ocr_parser import extract_bill_data
 
 bills_bp = Blueprint("bills", __name__, url_prefix="/api/v1/bills")
 
+DEFAULT_APPLIANCE_PROFILES = [
+    {"name": "Air Conditioner", "watts": 1500, "hours_per_day": 6, "days_per_month": 25},
+    {"name": "Refrigerator", "watts": 150, "hours_per_day": 24, "days_per_month": 30},
+    {"name": "Water Heater (Geyser)", "watts": 2000, "hours_per_day": 1, "days_per_month": 25},
+    {"name": "Ceiling Fans", "watts": 75, "hours_per_day": 10, "days_per_month": 30},
+    {"name": "Television", "watts": 120, "hours_per_day": 6, "days_per_month": 30},
+    {"name": "Washing Machine", "watts": 500, "hours_per_day": 1, "days_per_month": 15},
+    {"name": "LED Lighting", "watts": 40, "hours_per_day": 6, "days_per_month": 30},
+    {"name": "Laptop / Computer", "watts": 80, "hours_per_day": 5, "days_per_month": 25}
+]
+
+def bifurcate_bill_by_appliances(units, total_amount, user_id, db):
+    """
+    Distribute the bill total amount and total units across listed appliances
+    proportionally based on their baseline energy consumption.
+    """
+    units = float(units or 0.0)
+    total_amount = float(total_amount or 0.0)
+
+    user_apps = list(db.appliances.find({"user_id": user_id})) if (user_id and db is not None) else []
+    items = []
+
+    if user_apps:
+        for a in user_apps:
+            watts = float(a.get("watts", 100))
+            hours = float(a.get("hours_per_day", 1))
+            days = float(a.get("days_per_month", 30))
+            qty = int(a.get("quantity", 1))
+            base_kwh = (watts * hours * days * qty) / 1000.0
+            items.append({
+                "name": a.get("name"),
+                "watts": watts,
+                "base_kwh": base_kwh,
+                "quantity": qty
+            })
+    else:
+        for p in DEFAULT_APPLIANCE_PROFILES:
+            watts = float(p["watts"])
+            hours = float(p["hours_per_day"])
+            days = float(p["days_per_month"])
+            base_kwh = (watts * hours * days) / 1000.0
+            items.append({
+                "name": p["name"],
+                "watts": watts,
+                "base_kwh": base_kwh,
+                "quantity": 1
+            })
+
+    total_base_kwh = sum(i["base_kwh"] for i in items)
+
+    bifurcated = []
+    for item in items:
+        share = (item["base_kwh"] / total_base_kwh) if total_base_kwh > 0 else 0.0
+        allocated_kwh = round(share * units, 2)
+        allocated_cost = round(share * total_amount, 2)
+        share_pct = round(share * 100.0, 1)
+        bifurcated.append({
+            "name": item["name"],
+            "watts": item["watts"],
+            "quantity": item["quantity"],
+            "allocated_kwh": allocated_kwh,
+            "allocated_cost": allocated_cost,
+            "share_percent": share_pct
+        })
+
+    bifurcated.sort(key=lambda x: x["allocated_cost"], reverse=True)
+    return bifurcated
+
 def _get_active_tariff_dict(user, db):
     active_id = user.get("active_tariff_id")
     tariff = None
@@ -151,6 +219,12 @@ def upload_bill_ocr(current_user):
             calc = calculate_bill(extracted["units"], active_tariff)
             extracted["calculated_preview"] = calc
             
+        total_for_bifurcation = extracted.get("total_amount") or (extracted.get("calculated_preview", {}).get("total") if extracted.get("calculated_preview") else 0)
+        units_for_bifurcation = extracted.get("units") or 0
+        extracted["appliance_bifurcation"] = bifurcate_bill_by_appliances(
+            units_for_bifurcation, total_for_bifurcation, current_user["_id"], db
+        )
+            
         return jsonify({
             "success": True,
             "message": "Bill extracted successfully. Please review and confirm.",
@@ -219,6 +293,8 @@ def create_bill(current_user):
     }
     
     calc_res = calculate_bill(units, active_tariff, rebate=rebate, other_charges=other_charges)
+    final_amount = float(actual_total) if actual_total is not None else calc_res["total"]
+    appliance_bifurcation = bifurcate_bill_by_appliances(units, final_amount, user_id, db)
     
     bill_doc = {
         "user_id": user_id,
@@ -234,8 +310,9 @@ def create_bill(current_user):
             "other_charges": other_charges,
             "rebate": rebate
         },
+        "appliance_breakdown": appliance_bifurcation,
         "calculated_total": calc_res["total"],
-        "actual_total": float(actual_total) if actual_total is not None else calc_res["total"],
+        "actual_total": final_amount,
         "tariff_snapshot": tariff_snapshot,
         "source": source,
         "file_name": file_name,
@@ -313,6 +390,10 @@ def get_bill_detail(current_user, bill_id):
     bill["id"] = str(bill["_id"])
     del bill["_id"]
     bill["user_id"] = str(bill["user_id"])
+    if not bill.get("appliance_breakdown"):
+        units_val = bill.get("units", 0)
+        total_val = bill.get("actual_total") or bill.get("calculated_total", 0)
+        bill["appliance_breakdown"] = bifurcate_bill_by_appliances(units_val, total_val, current_user["_id"], db)
     if bill.get("created_at"):
         bill["created_at"] = bill["created_at"].isoformat()
     if bill.get("updated_at"):

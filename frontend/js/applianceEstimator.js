@@ -119,16 +119,36 @@ const APPLIANCE_PROFILES = [
   }
 ];
 
+function getApplianceIcon(name = '') {
+  const n = name.toLowerCase();
+  if (n.includes('ac') || n.includes('air condition')) return '❄️';
+  if (n.includes('refriger') || n.includes('fridge')) return '🧊';
+  if (n.includes('tv') || n.includes('television')) return '📺';
+  if (n.includes('geyser') || n.includes('water heater')) return '🚿';
+  if (n.includes('fan')) return '🌀';
+  if (n.includes('light') || n.includes('bulb') || n.includes('led')) return '💡';
+  if (n.includes('wash') || n.includes('laundry')) return '🫧';
+  if (n.includes('micro') || n.includes('oven')) return '🍳';
+  if (n.includes('laptop') || n.includes('pc') || n.includes('computer') || n.includes('desktop')) return '💻';
+  if (n.includes('pump') || n.includes('motor')) return '💧';
+  if (n.includes('iron')) return '👔';
+  return '🔌';
+}
+
+function getApplianceColor(idx) {
+  const palette = ['#3b82f6', '#06b6d4', '#f59e0b', '#8b5cf6', '#10b981', '#64748b', '#fbbf24', '#f97316', '#a78bfa', '#60a5fa', '#22d3ee', '#fb923c'];
+  return palette[idx % palette.length];
+}
+
 /**
  * Computes per-appliance kWh from total bill kWh using proportional distribution.
- * @param {number} totalKwh  – Total units from the bill
+ * @param {number} totalKwh – Total units from the bill
  * @param {number} ratePerKwh – Avg rate used to compute cost per appliance
  * @returns {Array} – Sorted appliance breakdown array
  */
 function estimateApplianceUsage(totalKwh, ratePerKwh = 8.5) {
   if (!totalKwh || totalKwh <= 0) return [];
 
-  // Step 1: Compute raw monthly kWh for each appliance
   const raw = APPLIANCE_PROFILES.map(a => ({
     ...a,
     rawKwh: (a.watts * a.hours * a.days) / 1000
@@ -136,20 +156,21 @@ function estimateApplianceUsage(totalKwh, ratePerKwh = 8.5) {
 
   const totalRaw = raw.reduce((s, a) => s + a.rawKwh, 0);
 
-  // Step 2: Normalise to actual bill kWh
-  const result = raw.map(a => {
+  const result = raw.map((a, idx) => {
     const share = totalRaw > 0 ? a.rawKwh / totalRaw : 0;
     const kwh   = parseFloat((share * totalKwh).toFixed(2));
     const cost  = parseFloat((kwh * ratePerKwh).toFixed(2));
     return {
-      ...a,
+      name: a.name,
+      icon: a.icon || getApplianceIcon(a.name),
+      watts: a.watts,
       kwh,
       cost,
-      sharePct: parseFloat((share * 100).toFixed(1))
+      sharePct: parseFloat((share * 100).toFixed(1)),
+      color: a.color || getApplianceColor(idx)
     };
   });
 
-  // Step 3: Sort by descending kWh
   return result.sort((a, b) => b.kwh - a.kwh);
 }
 
@@ -160,8 +181,9 @@ function estimateApplianceUsage(totalKwh, ratePerKwh = 8.5) {
  * @param {number} totalCost – Total bill amount (for cost ratio)
  * @param {string} labelId   – ID of the badge label to update with kWh
  * @param {string} sectionId – ID of the wrapper section to show/hide
+ * @param {Array} serverBifurcation – Optional server-calculated bifurcation array
  */
-function renderApplianceTiles(gridId, totalKwh, totalCost, labelId, sectionId) {
+function renderApplianceTiles(gridId, totalKwh, totalCost, labelId, sectionId, serverBifurcation = null) {
   if (!totalKwh || totalKwh <= 0) return;
 
   const section = document.getElementById(sectionId);
@@ -170,9 +192,21 @@ function renderApplianceTiles(gridId, totalKwh, totalCost, labelId, sectionId) {
 
   if (!section || !grid) return;
 
-  // Derive avg cost rate
-  const avgRate = totalKwh > 0 ? (totalCost / totalKwh) : 8.5;
-  const breakdown = estimateApplianceUsage(totalKwh, avgRate);
+  let breakdown = [];
+  if (Array.isArray(serverBifurcation) && serverBifurcation.length > 0) {
+    breakdown = serverBifurcation.map((item, idx) => ({
+      name: item.name,
+      icon: getApplianceIcon(item.name),
+      watts: item.watts,
+      kwh: item.allocated_kwh,
+      cost: item.allocated_cost,
+      sharePct: item.share_percent,
+      color: getApplianceColor(idx)
+    }));
+  } else {
+    const avgRate = totalKwh > 0 ? (totalCost / totalKwh) : 8.5;
+    breakdown = estimateApplianceUsage(totalKwh, avgRate);
+  }
 
   if (label) label.innerText = totalKwh.toFixed(1);
   section.style.display = 'block';
@@ -182,7 +216,7 @@ function renderApplianceTiles(gridId, totalKwh, totalCost, labelId, sectionId) {
       <div class="app-icon">${a.icon}</div>
       <div class="app-name">${a.name}</div>
       <div class="app-kwh">${a.kwh} kWh</div>
-      <div class="app-cost">₹${a.cost.toFixed(0)}</div>
+      <div class="app-cost">₹${a.cost.toFixed(2)}</div>
       <div class="app-bar-row">
         <div class="app-bar-fill" style="width:${a.sharePct}%;"></div>
       </div>

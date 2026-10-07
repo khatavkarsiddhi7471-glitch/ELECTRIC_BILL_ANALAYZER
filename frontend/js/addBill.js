@@ -256,13 +256,14 @@ function populateOcrModal(data) {
   // ── Appliance usage breakdown in OCR modal ──
   const units = parseFloat(data.units) || 0;
   const totalAmt = parseFloat(data.total_amount) || (data.calculated_preview ? data.calculated_preview.total : 0);
-  if (units > 0) {
+  if (units > 0 || totalAmt > 0) {
     renderApplianceTiles(
       'ocr-app-grid',
       units,
       totalAmt,
       'ocr-kwh-label',
-      'ocr-appliance-section'
+      'ocr-appliance-section',
+      data.appliance_bifurcation
     );
   }
 

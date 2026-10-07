@@ -85,6 +85,33 @@ function renderBill(b) {
   }
 
   document.getElementById('detail-calc-total').innerText = formatCurrency(b.calculated_total);
+
+  // Render Appliance Bifurcation Table
+  const appTbody = document.getElementById('detail-appliance-tbody');
+  const appBreakdown = b.appliance_breakdown || [];
+
+  if (!appTbody) return;
+
+  if (appBreakdown.length === 0) {
+    appTbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No appliance breakdown available.</td></tr>`;
+  } else {
+    appTbody.innerHTML = appBreakdown.map(a => `
+      <tr>
+        <td><strong>${a.name}</strong> ${a.quantity > 1 ? `<span style="font-size:0.75rem; color:var(--text-muted);">(×${a.quantity})</span>` : ''}</td>
+        <td style="color:var(--text-secondary);">${a.watts}W</td>
+        <td><strong style="color:var(--accent-blue);">${a.allocated_kwh} kWh</strong></td>
+        <td><strong style="color:var(--accent-emerald);">${formatCurrency(a.allocated_cost)}</strong></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="flex:1; background:rgba(255,255,255,0.06); height:6px; border-radius:3px; overflow:hidden; min-width:50px;">
+              <div style="background:var(--accent-amber); width:${a.share_percent}%; height:100%;"></div>
+            </div>
+            <span style="font-size:0.8rem; font-weight:600;">${a.share_percent}%</span>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
 }
 
 function setupPdfDownload(billId) {

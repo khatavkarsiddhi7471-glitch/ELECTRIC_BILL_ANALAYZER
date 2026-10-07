@@ -95,6 +95,33 @@
             <span id="detail-calc-total">₹0.00</span>
           </div>
         </div>
+
+        <!-- Appliance Cost & Usage Bifurcation -->
+        <div style="margin-top:2rem; background:rgba(15,23,42,0.6); border:1px solid rgba(245,158,11,0.3); border-radius:var(--radius-md); padding:1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+            <h3 style="font-size:1.1rem; display:flex; align-items:center; gap:0.5rem;">
+              🏠 Appliance-Wise Cost & Usage Bifurcation
+            </h3>
+            <span class="badge badge-amber">Extracted Bill Amount Distribution</span>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Estimated breakdown of this bill's total cost and energy units across your listed appliances based on power consumption weights.
+          </p>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Appliance</th>
+                <th>Wattage</th>
+                <th>Allocated Units</th>
+                <th>Allocated Cost</th>
+                <th>Share %</th>
+              </tr>
+            </thead>
+            <tbody id="detail-appliance-tbody">
+              <!-- Dynamic appliance rows -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
