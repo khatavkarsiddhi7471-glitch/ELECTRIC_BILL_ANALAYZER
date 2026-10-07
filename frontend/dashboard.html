@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <!-- Top Action Bar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1 style="font-size:1.8rem;">Electricity Analytics Dashboard</h1>
+        <p style="color:var(--text-secondary); font-size:0.9rem;" id="welcome-msg">Monitoring your energy consumption & savings</p>
+      </div>
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <button id="download-report-btn" class="btn btn-secondary">
+          📥 Download PDF Report
+        </button>
+        <a href="/add-bill.html" class="btn btn-primary">
+          ➕ Add / Upload Bill
+        </a>
+      </div>
+    </div>
+
+    <!-- Empty State Alert if no bills -->
+    <div id="empty-state" class="card" style="display:none; text-align:center; padding:3rem 1.5rem; margin-bottom:2rem; border:1px dashed var(--accent-blue);">
+      <div style="font-size:3rem; margin-bottom:1rem;">⚡</div>
+      <h2>No Electricity Bills Added Yet</h2>
+      <p style="color:var(--text-secondary); max-width:500px; margin:0.5rem auto 1.5rem;">
+        Add your first electricity bill (either manually or by uploading your PDF/image bill) to unlock analytics, slab breakdowns, and saving tips!
+      </p>
+      <a href="/add-bill.html" class="btn btn-primary">Add Your First Bill →</a>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid" id="kpi-section">
+      <div class="kpi-card">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-content">
+          <h4>Latest Consumption</h4>
+          <div class="value" id="kpi-units">0 kWh</div>
+          <div class="subtext" id="kpi-month-label">No data</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--accent-emerald);">💰</div>
+        <div class="kpi-content">
+          <h4>Latest Bill Amount</h4>
+          <div class="value text-emerald" id="kpi-amount">₹0.00</div>
+          <div class="subtext" id="kpi-mom-cost">0% MoM change</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--accent-amber);">📊</div>
+        <div class="kpi-content">
+          <h4>Avg Cost / Unit</h4>
+          <div class="value text-amber" id="kpi-rate">₹0.00/kWh</div>
+          <div class="subtext" id="kpi-total-bills">Based on 0 bills</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(139, 92, 246, 0.15); color:var(--accent-purple);">🔮</div>
+        <div class="kpi-content">
+          <h4>Predicted Next Bill</h4>
+          <div class="value text-blue" id="kpi-prediction">--</div>
+          <div class="subtext" id="kpi-pred-model">ML Forecast</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📈 Monthly Consumption & Cost Trend</div>
+        </div>
+        <div style="height:280px; position:relative;">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Monthly Bill Comparison</div>
+        </div>
+        <div style="height:280px; position:relative;">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔌 Appliance Consumption Share</div>
+          <a href="/appliances.html" class="btn btn-secondary btn-sm">+ Manage</a>
+        </div>
+        <div style="height:260px; position:relative;">
+          <canvas id="applianceChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📑 Bill Composition (Energy vs Fixed vs Duty)</div>
+        </div>
+        <div style="height:260px; position:relative;">
+          <canvas id="stackedChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forecast & Tips Row -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap:1.5rem;">
+      <!-- Prediction Card -->
+      <div class="card" id="forecast-card">
+        <div class="card-header">
+          <div class="card-title">🔮 Next Billing Cycle Forecast</div>
+          <span class="badge badge-blue" id="forecast-badge">Predictor</span>
+        </div>
+        <div id="forecast-content">
+          <p style="color:var(--text-secondary);">Loading prediction engine...</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Tips -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💡 Top Savings Actions</div>
+          <a href="/tips.html" class="btn btn-secondary btn-sm">View All Tips</a>
+        </div>
+        <div id="top-tips-list">
+          <p style="color:var(--text-secondary);">Loading recommendations...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

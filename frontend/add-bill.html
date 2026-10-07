@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Electricity Bill — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition);
+    }
+    .tab-btn.active {
+      color: var(--accent-blue);
+      border-bottom-color: var(--accent-blue);
+    }
+    .dropzone {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    /* ── Appliance breakdown styles ── */
+    .app-usage-section {
+      margin-top: 2rem;
+    }
+    .app-usage-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .app-usage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.85rem;
+    }
+    .app-tile {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .app-tile::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--tile-color, var(--accent-blue));
+    }
+    .app-tile:hover {
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    .app-tile .app-icon { font-size: 1.75rem; }
+    .app-tile .app-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .app-tile .app-kwh {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-heading);
+    }
+    .app-tile .app-cost {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-emerald);
+    }
+    .app-tile .app-pct {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .app-bar-row {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border-radius: 2px;
+      height: 5px;
+      overflow: hidden;
+    }
+    .app-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--tile-color, var(--accent-blue));
+      transition: width 0.6s ease;
+    }
+    .app-usage-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.65rem;
+      background: rgba(255,255,255,0.02);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="max-width:960px; margin:0 auto;">
+      <div style="margin-bottom:1.5rem;">
+        <h1>Add Electricity Bill</h1>
+        <p style="color:var(--text-secondary);">Enter readings manually or upload your discom bill document (PDF / Image)</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div style="display:flex; border-bottom:1px solid var(--border-color); margin-bottom:1.5rem;">
+        <button class="tab-btn active" id="tab-manual-btn">✏️ Manual Entry</button>
+        <button class="tab-btn" id="tab-upload-btn">📄 Upload Bill (OCR Extraction)</button>
+      </div>
+
+      <!-- Tab 1: Manual Entry -->
+      <div id="tab-manual-content" style="display:grid; grid-template-columns: 1fr 360px; gap:1.5rem; align-items:start;">
+        <div class="card">
+          <h3 style="margin-bottom:1.25rem;">Meter Readings & Details</h3>
+          <form id="manual-bill-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="month">Billing Month *</label>
+                <input type="month" id="month" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="actual_total">Actual Bill Amount (₹)</label>
+                <input type="number" step="0.01" id="actual_total" class="form-control" placeholder="Optional (e.g. 1310.00)">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="prev_reading">Previous Meter Reading *</label>
+                <input type="number" step="0.1" id="prev_reading" class="form-control" placeholder="e.g. 1250" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="curr_reading">Current Meter Reading *</label>
+                <input type="number" step="0.1" id="curr_reading" class="form-control" placeholder="e.g. 1400" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="computed_units">Calculated Units (kWh)</label>
+                <input type="number" id="computed_units" class="form-control" readonly style="background:rgba(255,255,255,0.03); color:var(--accent-blue); font-weight:700;">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="rebate">Rebates / Subsidy (₹)</label>
+                <input type="number" step="0.01" id="rebate" class="form-control" placeholder="0.00" value="0.00">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="other_charges">Other Surcharges (₹)</label>
+              <input type="number" step="0.01" id="other_charges" class="form-control" placeholder="0.00" value="0.00">
+            </div>
+
+            <button type="submit" id="save-bill-btn" class="btn btn-primary" style="width:100%; padding:0.85rem; margin-top:0.5rem;">
+              💾 Save Bill to History
+            </button>
+          </form>
+        </div>
+
+        <!-- Live Calculation Preview Card -->
+        <div>
+          <div class="card" style="border-color:rgba(59,130,246,0.3); background:rgba(15,23,42,0.85);">
+            <h3 style="font-size:1.1rem; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+              ⚡ Live Bill Preview
+            </h3>
+            <div id="preview-lines" style="font-size:0.85rem; margin-bottom:1rem;">
+              <p style="color:var(--text-muted);">Enter meter readings to see instant slab breakdown.</p>
+            </div>
+
+            <div style="border-top:1px solid var(--border-color); padding-top:0.75rem;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.85rem; color:var(--text-secondary);">
+                <span>Energy Charges:</span>
+                <strong id="preview-energy">₹0.00</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.85rem; color:var(--text-secondary);">
+                <span>Fixed Charge:</span>
+                <strong id="preview-fixed">₹0.00</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.85rem; color:var(--text-secondary);">
+                <span>Electricity Duty (16%):</span>
+                <strong id="preview-duty">₹0.00</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:700; color:var(--accent-emerald); border-top:1px dashed var(--border-color); padding-top:0.5rem;">
+                <span>Total Estimated:</span>
+                <span id="preview-total">₹0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Appliance Breakdown (manual tab) -->
+          <div id="manual-appliance-section" class="app-usage-section" style="display:none;">
+            <div class="card" style="border-color:rgba(245,158,11,0.25); background:rgba(15,23,42,0.85);">
+              <div class="app-usage-header">
+                <h3 style="font-size:1.05rem; display:flex; align-items:center; gap:0.5rem;">
+                  🏠 Estimated Appliance Usage
+                </h3>
+                <span class="badge badge-amber" style="font-size:0.72rem;">Based on <span id="manual-kwh-label">0</span> kWh</span>
+              </div>
+              <div class="app-usage-grid" id="manual-app-grid"></div>
+              <div class="app-usage-note">⚠️ Estimates assume typical Indian household usage patterns. Actual usage varies by appliance model and habit.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Upload Bill OCR -->
+      <div id="tab-upload-content" style="display:none;">
+        <div class="card">
+          <div class="dropzone" id="upload-dropzone">
+            <input type="file" id="file-input" accept=".pdf,.png,.jpg,.jpeg" style="display:none;">
+            <div style="font-size:3rem; margin-bottom:0.75rem;">📄</div>
+            <h3>Upload PDF or Scanned Bill Image</h3>
+            <p style="color:var(--text-secondary); margin:0.5rem 0 1rem; font-size:0.9rem;">
+              Supports PDF, PNG, JPG (up to 5MB). Optical Character Recognition will extract key fields.
+            </p>
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+              Browse Files
+            </button>
+          </div>
+
+          <div id="ocr-loading" style="display:none; text-align:center; padding:2rem;">
+            <div style="font-size:2rem; animation:pulse 1.5s infinite;">⏳</div>
+            <h4 style="margin-top:0.5rem;">Extracting bill details with OCR parser...</h4>
+            <p style="color:var(--text-secondary); font-size:0.85rem;">Parsing readings, slab units, and taxes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- OCR Verification Modal -->
+  <div class="modal-backdrop" id="ocr-modal">
+    <div class="modal-card">
+      <div class="card-header">
+        <div class="card-title">🔍 Review & Confirm Extracted Bill</div>
+        <button type="button" id="close-modal-btn" class="btn btn-secondary btn-sm">✕</button>
+      </div>
+      <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:1rem;">
+        Please verify the OCR-extracted values below. You can correct any field before saving to your records.
+      </p>
+
+      <form id="ocr-confirm-form">
+        <input type="hidden" id="ocr-filename">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ocr-month">Billing Month</label>
+            <input type="month" id="ocr-month" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ocr-total">Total Amount (₹)</label>
+            <input type="number" step="0.01" id="ocr-total" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ocr-prev">Previous Reading</label>
+            <input type="number" step="0.1" id="ocr-prev" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ocr-curr">Current Reading</label>
+            <input type="number" step="0.1" id="ocr-curr" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ocr-units">Billed Units (kWh)</label>
+          <input type="number" step="0.1" id="ocr-units" class="form-control" required>
+        </div>
+
+        <div id="ocr-preview-box" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.85rem; margin-bottom:1rem; font-size:0.85rem;">
+          <div style="display:flex; justify-content:space-between;">
+            <span>Calculated Bill Breakdown:</span>
+            <strong id="ocr-calc-total" style="color:var(--accent-emerald);">₹0.00</strong>
+          </div>
+        </div>
+
+        <!-- Appliance Usage Breakdown inside OCR modal -->
+        <div id="ocr-appliance-section" style="display:none; margin-bottom:1.25rem;">
+          <div style="border:1px solid rgba(245,158,11,0.3); border-radius:var(--radius-md); padding:1rem; background:rgba(15,23,42,0.5);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.85rem;">
+              <span style="font-size:0.9rem; font-weight:700; display:flex; align-items:center; gap:0.4rem;">🏠 Estimated Appliance Usage</span>
+              <span class="badge badge-amber" style="font-size:0.72rem;">~<span id="ocr-kwh-label">0</span> kWh</span>
+            </div>
+            <div class="app-usage-grid" id="ocr-app-grid"></div>
+            <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.75rem; text-align:center;">Estimates based on typical Indian household usage. Actual values vary.</p>
+          </div>
+        </div>
+
+        <button type="submit" id="ocr-save-btn" class="btn btn-primary" style="width:100%; padding:0.85rem;">
+          ✅ Confirm & Save Bill
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/applianceEstimator.js"></script>
+  <script src="/js/addBill.js"></script>
+</body>
+</html>

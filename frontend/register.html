@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:100vh; padding:1.5rem;">
+  <div class="card" style="width:100%; max-width:480px; padding:2.5rem 2rem;">
+    <div style="text-align:center; margin-bottom:2rem;">
+      <a href="/" style="display:inline-flex; align-items:center; gap:0.5rem; font-size:1.4rem; font-family:var(--font-heading); font-weight:700; color:#fff; text-decoration:none;">
+        <span class="logo-bolt">⚡</span> VoltWise
+      </a>
+      <h2 style="margin-top:1rem; font-size:1.5rem;">Create an Account</h2>
+      <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.25rem;">Start tracking and reducing your electricity bills</p>
+    </div>
+
+    <form id="register-form">
+      <div class="form-group">
+        <label class="form-label" for="name">Full Name</label>
+        <input type="text" id="name" class="form-control" placeholder="Ravi Patil" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password (minimum 8 characters)</label>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" minlength="8" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="consumer_number">Consumer / CA Number (Optional)</label>
+        <input type="text" id="consumer_number" class="form-control" placeholder="e.g. 012345678901">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="distributor">Electricity Distributor</label>
+        <select id="distributor" class="form-control">
+          <option value="MSEDCL" selected>MSEDCL (Maharashtra State Electricity)</option>
+          <option value="Tata Power">Tata Power</option>
+          <option value="Adani Electricity">Adani Electricity</option>
+          <option value="BESCOM">BESCOM (Karnataka)</option>
+          <option value="UPPCL">UPPCL (Uttar Pradesh)</option>
+          <option value="Other">Other / Custom</option>
+        </select>
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn btn-primary" style="width:100%; padding:0.85rem; margin-top:0.5rem;">
+        Complete Registration
+      </button>
+    </form>
+
+    <div style="margin-top:1.5rem; text-align:center; font-size:0.9rem; color:var(--text-secondary);">
+      Already have an account? <a href="/login.html" style="font-weight:600;">Sign in</a>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (TokenManager.isAuthenticated()) {
+      window.location.href = '/dashboard.html';
+    }
+
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const consumer_number = document.getElementById('consumer_number').value.trim();
+      const distributor = document.getElementById('distributor').value;
+
+      btn.disabled = true;
+      btn.innerText = 'Creating Account...';
+
+      try {
+        const res = await apiFetch('/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ name, email, password, consumer_number, distributor })
+        });
+
+        TokenManager.setToken(res.data.token);
+        TokenManager.setUser(res.data.user);
+        showToast('Registration complete! Welcome.', 'success');
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 600);
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerText = 'Complete Registration';
+      }
+    });
+  </script>
+</body>
+</html>

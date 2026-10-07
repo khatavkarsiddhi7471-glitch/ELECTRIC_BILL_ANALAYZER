@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Saving Recommendations — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="margin-bottom:1.5rem;">
+      <h1>Personalized Energy Saving Tips</h1>
+      <p style="color:var(--text-secondary);">Rule-based recommendations tailored to your appliances and billing slabs</p>
+    </div>
+
+    <!-- Savings Potential Banner -->
+    <div class="card" style="margin-bottom:2rem; background:linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.15)); border-color:rgba(16, 185, 129, 0.3);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1.5rem;">
+        <div>
+          <span class="badge badge-emerald" style="margin-bottom:0.5rem;">💰 Actionable Potential</span>
+          <h2>Unlock Up to <span id="total-savings-inr" style="color:var(--accent-emerald);">₹0.00</span> / month in Savings</h2>
+          <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.25rem;">
+            Estimated potential energy reduction: <strong id="total-savings-kwh" style="color:var(--accent-blue);">0 kWh / month</strong> across identified optimizations.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips Container -->
+    <div id="tips-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
+      <p style="color:var(--text-muted);">Loading recommendations...</p>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/tips.js"></script>
+</body>
+</html>

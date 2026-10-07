@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile & Alert Settings — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="max-width:680px; margin:0 auto;">
+      <div style="margin-bottom:1.5rem;">
+        <h1>Account & Alert Thresholds</h1>
+        <p style="color:var(--text-secondary);">Manage personal settings, budget targets, and alert trigger parameters</p>
+      </div>
+
+      <div class="card">
+        <form id="profile-form">
+          <h3 style="margin-bottom:1.25rem; font-size:1.15rem; color:var(--accent-blue);">👤 Personal Details</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="prof-name">Full Name</label>
+              <input type="text" id="prof-name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prof-email">Email Address</label>
+              <input type="email" id="prof-email" class="form-control" readonly style="background:rgba(255,255,255,0.03); color:var(--text-muted);">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="prof-consumer">Consumer Number</label>
+              <input type="text" id="prof-consumer" class="form-control" placeholder="e.g. 012345678901">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prof-distributor">Electricity Distributor</label>
+              <input type="text" id="prof-distributor" class="form-control" placeholder="e.g. MSEDCL">
+            </div>
+          </div>
+
+          <h3 style="margin:1.5rem 0 1rem; font-size:1.15rem; color:var(--accent-amber);">🔔 Alert Triggers & Budget</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="prof-unit-threshold">Monthly Unit Threshold (kWh)</label>
+              <input type="number" id="prof-unit-threshold" class="form-control" placeholder="200" required>
+              <small style="color:var(--text-muted); font-size:0.75rem;">Alert triggers when monthly units exceed this value.</small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-budget">Monthly Bill Budget (₹)</label>
+              <input type="number" id="prof-budget" class="form-control" placeholder="1500" required>
+              <small style="color:var(--text-muted); font-size:0.75rem;">Alert triggers if estimated/actual bill exceeds budget.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prof-spike-pct">Consumption Spike Threshold (%)</label>
+            <input type="number" id="prof-spike-pct" class="form-control" placeholder="20" required>
+            <small style="color:var(--text-muted); font-size:0.75rem;">Alert triggers if usage rises by more than this % MoM.</small>
+          </div>
+
+          <button type="submit" id="save-profile-btn" class="btn btn-primary" style="width:100%; padding:0.85rem; margin-top:1rem;">
+            💾 Save Profile & Settings
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/profile.js"></script>
+</body>
+</html>

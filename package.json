@@ -1,0 +1,18 @@
+{
+  "name": "electric_bill_analayzer-main",
+  "version": "1.0.0",
+  "description": "> A full-stack web application designed to help households track, predict, understand, and reduce electricity costs with exact slab calculations, appliance power estimation, OCR bill parsing, statistical machine learning forecasting, and downloadable PDF reports.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^18.0.6",
+    "googleapis": "^184.0.0",
+    "nodemailer": "^10.0.16"
+  }
+}

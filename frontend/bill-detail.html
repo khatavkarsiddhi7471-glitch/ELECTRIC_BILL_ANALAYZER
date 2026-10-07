@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bill Details — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="max-width:860px; margin:0 auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <a href="/history.html" style="font-size:0.85rem; color:var(--text-secondary);">← Back to History</a>
+          <h1 style="margin-top:0.25rem;" id="bill-heading">Bill Breakdown</h1>
+        </div>
+        <button id="download-bill-pdf" class="btn btn-primary">
+          📥 Download Month PDF Report
+        </button>
+      </div>
+
+      <div class="card" id="detail-card" style="padding:2rem;">
+        <!-- Header Info -->
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:1.25rem; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+          <div>
+            <div style="font-size:0.85rem; color:var(--text-secondary);">Billing Cycle</div>
+            <h2 id="detail-month" style="font-size:1.5rem; color:var(--accent-blue);">--</h2>
+            <div id="detail-source-badge" style="margin-top:0.35rem;"></div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.85rem; color:var(--text-secondary);">Total Payable</div>
+            <h2 id="detail-total" style="font-size:1.75rem; color:var(--accent-emerald);">₹0.00</h2>
+            <div id="detail-variance" style="font-size:0.8rem; color:var(--text-muted);"></div>
+          </div>
+        </div>
+
+        <!-- Meter Reading Metrics -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.5rem;">
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Previous Reading</div>
+            <div style="font-size:1.1rem; font-weight:600;" id="detail-prev">--</div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Current Reading</div>
+            <div style="font-size:1.1rem; font-weight:600;" id="detail-curr">--</div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Total Units Billed</div>
+            <div style="font-size:1.1rem; font-weight:700; color:var(--accent-blue);" id="detail-units">-- kWh</div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Avg Cost / Unit</div>
+            <div style="font-size:1.1rem; font-weight:600; color:var(--accent-amber);" id="detail-avg-cost">--</div>
+          </div>
+        </div>
+
+        <!-- Slab Breakdown Table -->
+        <h3 style="font-size:1.1rem; margin-bottom:0.75rem;">📊 Slab-Wise Tariff Calculation</h3>
+        <table class="table" style="margin-bottom:1.5rem;">
+          <thead>
+            <tr>
+              <th>Slab Tier</th>
+              <th>Units in Slab</th>
+              <th>Rate (₹/kWh)</th>
+              <th style="text-align:right;">Slab Charge</th>
+            </tr>
+          </thead>
+          <tbody id="detail-slab-tbody">
+            <!-- Dynamic slab rows -->
+          </tbody>
+        </table>
+
+        <!-- Charges Summary -->
+        <div style="background:rgba(15,23,42,0.8); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.9rem;">
+            <span style="color:var(--text-secondary);">Energy Charges Subtotal:</span>
+            <strong id="detail-energy">₹0.00</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.9rem;">
+            <span style="color:var(--text-secondary);">Fixed / Demand Charge:</span>
+            <strong id="detail-fixed">₹0.00</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.9rem;">
+            <span style="color:var(--text-secondary);">Electricity Duty / Taxes:</span>
+            <strong id="detail-duty">₹0.00</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem; font-size:0.9rem;" id="detail-rebate-row">
+            <span style="color:var(--text-secondary);">Rebate / Concession:</span>
+            <strong style="color:var(--accent-emerald);" id="detail-rebate">-₹0.00</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:1.25rem; font-weight:700; color:var(--accent-emerald); border-top:1px dashed var(--border-color); padding-top:0.6rem; margin-top:0.4rem;">
+            <span>Final Bill Amount:</span>
+            <span id="detail-calc-total">₹0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/billDetail.js"></script>
+</body>
+</html>

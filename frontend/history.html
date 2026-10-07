@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bill History — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+      <div>
+        <h1>Monthly Bill History</h1>
+        <p style="color:var(--text-secondary);">Manage, review, and filter your past electricity bills</p>
+      </div>
+      <div style="display:flex; gap:0.75rem;">
+        <button id="export-csv-btn" class="btn btn-secondary btn-sm">📊 Export CSV</button>
+        <a href="/add-bill.html" class="btn btn-primary btn-sm">➕ Add New Bill</a>
+      </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="card" style="margin-bottom:1.5rem; padding:1rem 1.25rem;">
+      <div style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+        <div style="flex:1; min-width:180px;">
+          <input type="text" id="filter-search" class="form-control" placeholder="Search by month (e.g. 2026-05)...">
+        </div>
+        <div style="min-width:140px;">
+          <select id="filter-year" class="form-control">
+            <option value="">All Years</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+        <button id="apply-filters-btn" class="btn btn-secondary">Filter</button>
+        <button id="clear-filters-btn" class="btn btn-secondary" style="color:var(--text-muted);">Reset</button>
+      </div>
+    </div>
+
+    <!-- Bills Table -->
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="table-responsive">
+        <table class="table" id="bills-table">
+          <thead>
+            <tr>
+              <th>Billing Month</th>
+              <th>Readings (Prev → Curr)</th>
+              <th>Units Billed</th>
+              <th>Calculated Bill</th>
+              <th>Actual Amount</th>
+              <th>Source</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bills-tbody">
+            <tr>
+              <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                Loading bill history...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Bill Modal -->
+  <div class="modal-backdrop" id="edit-modal">
+    <div class="modal-card">
+      <div class="card-header">
+        <div class="card-title">✏️ Edit Bill Record</div>
+        <button type="button" id="close-edit-modal" class="btn btn-secondary btn-sm">✕</button>
+      </div>
+
+      <form id="edit-bill-form">
+        <input type="hidden" id="edit-bill-id">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit-prev">Previous Reading</label>
+            <input type="number" step="0.1" id="edit-prev" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-curr">Current Reading</label>
+            <input type="number" step="0.1" id="edit-curr" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit-units">Units (kWh)</label>
+            <input type="number" step="0.1" id="edit-units" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-actual">Actual Amount (₹)</label>
+            <input type="number" step="0.01" id="edit-actual" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="edit-rebate">Rebate (₹)</label>
+            <input type="number" step="0.01" id="edit-rebate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-other">Other Charges (₹)</label>
+            <input type="number" step="0.01" id="edit-other" class="form-control">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; padding:0.85rem; margin-top:0.5rem;">
+          Update & Recalculate Bill
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/history.js"></script>
+</body>
+</html>

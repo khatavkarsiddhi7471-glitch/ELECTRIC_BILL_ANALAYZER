@@ -1,0 +1,2 @@
+ocr functioning for data extraction from bill
+

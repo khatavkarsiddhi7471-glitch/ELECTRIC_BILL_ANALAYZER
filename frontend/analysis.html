@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consumption Analytics — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="margin-bottom:1.5rem;">
+      <h1>Consumption & Slab Analysis</h1>
+      <p style="color:var(--text-secondary);">Deep dive into usage patterns, seasonal swings, and simulate what-if consumption</p>
+    </div>
+
+    <!-- Highlights Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">📊</div>
+        <div class="kpi-content">
+          <h4>Monthly Average</h4>
+          <div class="value" id="ana-avg-units">0 kWh</div>
+          <div class="subtext" id="ana-avg-bill">Avg ₹0.00 / month</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(244, 63, 94, 0.15); color:var(--accent-rose);">📈</div>
+        <div class="kpi-content">
+          <h4>Highest Month</h4>
+          <div class="value text-rose" id="ana-high-units">0 kWh</div>
+          <div class="subtext" id="ana-high-month">--</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--accent-emerald);">📉</div>
+        <div class="kpi-content">
+          <h4>Lowest Month</h4>
+          <div class="value text-emerald" id="ana-low-units">0 kWh</div>
+          <div class="subtext" id="ana-low-month">--</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--accent-amber);">⚡</div>
+        <div class="kpi-content">
+          <h4>Effective Unit Cost</h4>
+          <div class="value text-amber" id="ana-effective-rate">₹0.00</div>
+          <div class="subtext">All-in cost per kWh</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid: Trend Chart & What-If Calculator -->
+    <div style="display:grid; grid-template-columns: 1fr 380px; gap:1.5rem; align-items:start; margin-bottom:1.5rem;">
+      <!-- Trend Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📈 Units & Expense Progression</div>
+        </div>
+        <div style="height:320px; position:relative;">
+          <canvas id="analysisTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- What-If Calculator Card -->
+      <div class="card" style="border-color:rgba(59,130,246,0.3);">
+        <div class="card-header">
+          <div class="card-title">🧮 "What-If" Bill Simulator</div>
+        </div>
+        <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:1rem;">
+          Estimate your electricity bill for any hypothetical unit consumption without modifying history.
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="sim-units">Hypothetical Units (kWh)</label>
+          <input type="number" id="sim-units" class="form-control" placeholder="e.g. 150" value="150">
+        </div>
+
+        <div id="sim-result" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem; font-size:0.85rem;">
+          <div id="sim-lines" style="margin-bottom:0.75rem;"></div>
+          <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:700; color:var(--accent-emerald); border-top:1px dashed var(--border-color); padding-top:0.5rem;">
+            <span>Estimated Total:</span>
+            <span id="sim-total">₹0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/analysis.js"></script>
+</body>
+</html>

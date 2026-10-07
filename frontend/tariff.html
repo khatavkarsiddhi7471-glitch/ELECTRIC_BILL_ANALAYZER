@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tariff Profiles — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="margin-bottom:1.5rem;">
+      <h1>Tariff Slab Profiles</h1>
+      <p style="color:var(--text-secondary);">Manage regional discom tariff tiers, fixed charges, and government duties</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 420px; gap:1.5rem; align-items:start;">
+      <!-- Active & Available Tariffs List -->
+      <div class="card">
+        <h3 style="margin-bottom:1.25rem;">Available Tariff Profiles</h3>
+        <div id="tariffs-list">
+          <p style="color:var(--text-muted);">Loading tariff profiles...</p>
+        </div>
+      </div>
+
+      <!-- Create Custom Tariff -->
+      <div class="card">
+        <h3 style="margin-bottom:1.25rem;">➕ Create Custom Tariff</h3>
+        <form id="custom-tariff-form">
+          <div class="form-group">
+            <label class="form-label" for="t-name">Profile Name *</label>
+            <input type="text" id="t-name" class="form-control" placeholder="e.g. Custom Solar Tariff" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="t-distributor">Distributor / State</label>
+            <input type="text" id="t-distributor" class="form-control" placeholder="e.g. MSEDCL / TATA">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="t-fixed">Fixed Charge (₹)</label>
+              <input type="number" step="0.01" id="t-fixed" class="form-control" value="120.00" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t-duty">Electricity Duty (%)</label>
+              <input type="number" step="0.1" id="t-duty" class="form-control" value="16.0" required>
+            </div>
+          </div>
+
+          <div style="margin-bottom:1rem;">
+            <label class="form-label">Slab Ranges (₹ / Unit)</label>
+            <div class="form-row" style="margin-bottom:0.5rem;">
+              <input type="text" class="form-control" value="Slab 1: 0 to 100" readonly style="background:rgba(255,255,255,0.03);">
+              <input type="number" step="0.01" id="t-slab1-rate" class="form-control" placeholder="Rate ₹" value="5.00" required>
+            </div>
+            <div class="form-row" style="margin-bottom:0.5rem;">
+              <input type="text" class="form-control" value="Slab 2: 101 to 300" readonly style="background:rgba(255,255,255,0.03);">
+              <input type="number" step="0.01" id="t-slab2-rate" class="form-control" placeholder="Rate ₹" value="10.00" required>
+            </div>
+            <div class="form-row">
+              <input type="text" class="form-control" value="Slab 3: 301 & Above" readonly style="background:rgba(255,255,255,0.03);">
+              <input type="number" step="0.01" id="t-slab3-rate" class="form-control" placeholder="Rate ₹" value="14.00" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:0.85rem;">
+            Save & Add Custom Tariff
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/tariff.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appliance Cost Estimator — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="main-nav"></div>
+
+  <main class="main-content">
+    <div style="margin-bottom:1.5rem;">
+      <h1>Appliance-Wise Cost Estimator</h1>
+      <p style="color:var(--text-secondary);">Calculate individual appliance power draw, rank top consumers, and stop bill leakage</p>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">🔌</div>
+        <div class="kpi-content">
+          <h4>Tracked Appliances</h4>
+          <div class="value" id="app-total-count">0</div>
+          <div class="subtext">In household inventory</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--accent-amber);">⚡</div>
+        <div class="kpi-content">
+          <h4>Est. Monthly Consumption</h4>
+          <div class="value text-amber" id="app-total-kwh">0 kWh</div>
+          <div class="subtext">Sum of all appliances</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--accent-emerald);">💰</div>
+        <div class="kpi-content">
+          <h4>Est. Monthly Cost</h4>
+          <div class="value text-emerald" id="app-total-cost">₹0.00</div>
+          <div class="subtext">Based on marginal rate</div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:rgba(244, 63, 94, 0.15); color:var(--accent-rose);">⚠️</div>
+        <div class="kpi-content">
+          <h4>Top Energy Consumer</h4>
+          <div class="value text-rose" id="app-top-consumer" style="font-size:1.15rem; font-weight:700;">--</div>
+          <div class="subtext" id="app-top-share">0% of total usage</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Layout: Form & List -->
+    <div style="display:grid; grid-template-columns: 360px 1fr; gap:1.5rem; align-items:start;">
+      <!-- Add Appliance Card -->
+      <div class="card">
+        <h3 style="margin-bottom:1.25rem;">Add Appliance</h3>
+        
+        <!-- Quick Preset Dropdown -->
+        <div class="form-group">
+          <label class="form-label" for="preset-select">Quick Preset Catalog</label>
+          <select id="preset-select" class="form-control">
+            <option value="">-- Choose from standard catalog --</option>
+          </select>
+        </div>
+
+        <form id="appliance-form">
+          <div class="form-group">
+            <label class="form-label" for="app-name">Appliance Name *</label>
+            <input type="text" id="app-name" class="form-control" placeholder="e.g. Living Room Split AC" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="app-watts">Wattage (Watts) *</label>
+              <input type="number" id="app-watts" class="form-control" placeholder="e.g. 1500" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="app-qty">Quantity</label>
+              <input type="number" id="app-qty" class="form-control" value="1" min="1" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="app-hours">Hours / Day *</label>
+              <input type="number" step="0.5" id="app-hours" class="form-control" placeholder="e.g. 8" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="app-days">Days / Month</label>
+              <input type="number" id="app-days" class="form-control" value="30" max="31" required>
+            </div>
+          </div>
+
+          <!-- Formula Info Box -->
+          <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.75rem; margin-bottom:1.25rem; font-size:0.8rem; color:var(--text-secondary);">
+            <div><strong>Formula:</strong> (Watts × Hours × Days × Qty) ÷ 1000</div>
+            <div style="margin-top:4px;">Estimated: <strong id="preview-app-kwh" style="color:var(--accent-blue);">0.0 kWh/mo</strong> (~<strong id="preview-app-cost" style="color:var(--accent-emerald);">₹0.00</strong>)</div>
+          </div>
+
+          <button type="submit" id="add-app-btn" class="btn btn-primary" style="width:100%; padding:0.85rem;">
+            ➕ Add Appliance to List
+          </button>
+        </form>
+      </div>
+
+      <!-- Appliance Inventory Table -->
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:1.25rem; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="font-size:1.15rem;">Household Appliance Ranking</h3>
+          <span style="font-size:0.8rem; color:var(--text-muted);">Sorted by power consumption</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Appliance</th>
+                <th>Wattage & Usage</th>
+                <th>Monthly kWh</th>
+                <th>Est. Monthly Cost</th>
+                <th>Share %</th>
+                <th style="text-align:right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="app-tbody">
+              <tr>
+                <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                  Loading appliance inventory...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script src="/js/appliances.js"></script>
+</body>
+</html>

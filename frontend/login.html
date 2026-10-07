@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Smart Electricity Bill Analyzer</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:100vh; padding:1.5rem;">
+  <div class="card" style="width:100%; max-width:440px; padding:2.5rem 2rem;">
+    <div style="text-align:center; margin-bottom:2rem;">
+      <a href="/" style="display:inline-flex; align-items:center; gap:0.5rem; font-size:1.4rem; font-family:var(--font-heading); font-weight:700; color:#fff; text-decoration:none;">
+        <span class="logo-bolt">⚡</span> VoltWise
+      </a>
+      <h2 style="margin-top:1rem; font-size:1.5rem;">Welcome Back</h2>
+      <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.25rem;">Sign in to analyze your electricity bills</p>
+    </div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="name@example.com" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+          <label class="form-label" for="password" style="margin-bottom:0;">Password</label>
+          <a href="/forgot-password.html" style="font-size:0.82rem; font-weight:600; color:var(--accent-blue); opacity:0.85;" id="forgot-pw-link">Forgot password?</a>
+        </div>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn btn-primary" style="width:100%; padding:0.85rem; margin-top:0.5rem;">
+        Sign In
+      </button>
+    </form>
+
+    <div style="margin-top:1.5rem; text-align:center; font-size:0.9rem; color:var(--text-secondary);">
+      Don't have an account? <a href="/register.html" style="font-weight:600;">Sign up</a>
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    if (TokenManager.isAuthenticated()) {
+      window.location.href = '/dashboard.html';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      btn.disabled = true;
+      btn.innerText = 'Signing In...';
+
+      try {
+        const res = await apiFetch('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password })
+        });
+
+        TokenManager.setToken(res.data.token);
+        TokenManager.setUser(res.data.user);
+        showToast('Login successful! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 600);
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerText = 'Sign In';
+      }
+    });
+  </script>
+</body>
+</html>
