@@ -125,6 +125,20 @@ function renderLivePreview(data) {
   fixedEl.innerText = formatCurrency(data.fixed_charge);
   dutyEl.innerText = formatCurrency(data.duty);
   totalEl.innerText = formatCurrency(data.total);
+
+  // ── Appliance usage breakdown (manual tab) ──
+  const prevVal = parseFloat(document.getElementById('prev_reading').value) || 0;
+  const currVal = parseFloat(document.getElementById('curr_reading').value) || 0;
+  const units = Math.max(0, currVal - prevVal);
+  if (units > 0) {
+    renderApplianceTiles(
+      'manual-app-grid',
+      units,
+      data.total,
+      'manual-kwh-label',
+      'manual-appliance-section'
+    );
+  }
 }
 
 function setupManualFormSubmit() {
@@ -237,6 +251,19 @@ function populateOcrModal(data) {
 
   if (data.calculated_preview) {
     document.getElementById('ocr-calc-total').innerText = formatCurrency(data.calculated_preview.total);
+  }
+
+  // ── Appliance usage breakdown in OCR modal ──
+  const units = parseFloat(data.units) || 0;
+  const totalAmt = parseFloat(data.total_amount) || (data.calculated_preview ? data.calculated_preview.total : 0);
+  if (units > 0) {
+    renderApplianceTiles(
+      'ocr-app-grid',
+      units,
+      totalAmt,
+      'ocr-kwh-label',
+      'ocr-appliance-section'
+    );
   }
 
   modal.classList.add('show');
