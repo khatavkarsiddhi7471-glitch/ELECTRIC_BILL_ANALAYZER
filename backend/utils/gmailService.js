@@ -218,6 +218,7 @@ if (require.main === module) {
   sendPasswordResetEmail(toEmail, userName, resetUrl)
     .then(result => {
       process.stdout.write(JSON.stringify(result) + '\n');
+      process.exit(0);
     })
     .catch(err => {
       // Log detailed error to stderr only — never exposed to frontend
